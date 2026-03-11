@@ -9,10 +9,11 @@ import { ConfigPanel } from "./components/ConfigPanel";
 import type { GDConfig } from "./engine/types";
 
 function App() {
+  const BASE_SPEED_MS = 1000;
   const [config, setConfig] = useState<GDConfig>({
     learningRate: 0.01,
     totalEpochs: 12,
-    autoPlaySpeed: 1000,
+    autoPlaySpeed: 1, // multiplier: 1x = BASE_SPEED_MS
   });
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -23,7 +24,8 @@ function App() {
   }, []);
 
   // Stop auto-play when we can't go forward
-  useAutoPlay(isPlaying, config.autoPlaySpeed, gd.next, gd.canGoForward);
+  const autoPlayMs = BASE_SPEED_MS / config.autoPlaySpeed;
+  useAutoPlay(isPlaying, autoPlayMs, gd.next, gd.canGoForward);
 
   // Stop playing when reaching the end
   useEffect(() => {
@@ -49,13 +51,13 @@ function App() {
       {/* Config */}
       <ConfigPanel
         learningRate={config.learningRate}
-        autoPlaySpeed={config.autoPlaySpeed}
+        speedMultiplier={config.autoPlaySpeed}
         onLearningRateChange={(lr) => {
           setConfig((c) => ({ ...c, learningRate: lr }));
           gd.setLearningRate(lr);
         }}
-        onSpeedChange={(speed) =>
-          setConfig((c) => ({ ...c, autoPlaySpeed: speed }))
+        onSpeedChange={(multiplier) =>
+          setConfig((c) => ({ ...c, autoPlaySpeed: multiplier }))
         }
       />
 
