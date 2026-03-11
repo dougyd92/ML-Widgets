@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   ScatterChart,
   Scatter,
@@ -41,27 +42,36 @@ function renderDot(
   );
 }
 
+// Compute a stable axis domain from data points only (called once via useMemo)
+function computeFixedDomain(data: DataPoint[]) {
+  const xs = data.map((d) => d.x);
+  const ys = data.map((d) => d.y);
+  const dataXMin = Math.min(...xs);
+  const dataXMax = Math.max(...xs);
+  const dataYMin = Math.min(...ys);
+  const dataYMax = Math.max(...ys);
+
+  // Round to nice numbers with generous padding for the regression line
+  const xMin = Math.floor(dataXMin - 0.5);
+  const xMax = Math.ceil(dataXMax + 0.5);
+  const yRange = dataYMax - dataYMin;
+  const yMin = Math.floor(dataYMin - yRange * 0.3);
+  const yMax = Math.ceil(dataYMax + yRange * 0.3);
+
+  return { xMin, xMax, yMin, yMax };
+}
+
 export function ScatterPlot({ data, activeIndices, params }: Props) {
   const w0 = params.values.w0;
   const w1 = params.values.w1;
 
-  // Compute axis domain
-  const xs = data.map((d) => d.x);
-  const ys = data.map((d) => d.y);
-  const xMin = Math.min(...xs) - 0.5;
-  const xMax = Math.max(...xs) + 0.5;
-
-  // Include regression line endpoints in y range
-  const lineY1 = w0 + w1 * xMin;
-  const lineY2 = w0 + w1 * xMax;
-  const allYs = [...ys, lineY1, lineY2];
-  const yMin = Math.min(...allYs) - 1;
-  const yMax = Math.max(...allYs) + 1;
+  // Fixed domain based on data only — doesn't shift as params change
+  const { xMin, xMax, yMin, yMax } = useMemo(() => computeFixedDomain(data), [data]);
 
   // Regression line as two points
   const lineData = [
-    { x: xMin, y: lineY1 },
-    { x: xMax, y: lineY2 },
+    { x: xMin, y: w0 + w1 * xMin },
+    { x: xMax, y: w0 + w1 * xMax },
   ];
 
   // Residual line data
@@ -87,8 +97,10 @@ export function ScatterPlot({ data, activeIndices, params }: Props) {
           type="number"
           dataKey="y"
           domain={[yMin, yMax]}
+          allowDataOverflow
           name="y"
           tick={{ fontSize: 12 }}
+          tickFormatter={(v: number) => String(Math.round(v * 10) / 10)}
           label={{
             value: "y",
             angle: -90,
