@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
-import type { DataPoint, Parameters } from "../engine/types";
+import type { DataPoint, Parameters } from "@/engine/types";
 
 interface Props {
   data: DataPoint[];

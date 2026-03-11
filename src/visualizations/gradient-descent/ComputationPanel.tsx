@@ -1,4 +1,4 @@
-import type { StepResult, ComputationStep } from "../engine/types";
+import type { StepResult, ComputationStep } from "@/engine/types";
 import { MathLine } from "./MathLine";
 
 interface Props {

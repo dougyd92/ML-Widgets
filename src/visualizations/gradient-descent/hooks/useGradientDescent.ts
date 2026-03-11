@@ -1,10 +1,10 @@
 import { useState, useRef, useMemo, useCallback } from "react";
-import { GDEngine } from "../engine/engine";
-import { linearRegression } from "../engine/models/linearRegression";
-import { createVanillaSgd } from "../engine/updateRules/vanillaSgd";
-import { createSingleSample } from "../engine/batchStrategies/singleSample";
-import { generateData } from "../engine/data";
-import type { StepResult, DataPoint, Parameters, GDConfig, ComputationStep, ComputationPhase } from "../engine/types";
+import { GDEngine } from "@/engine/engine";
+import { linearRegression } from "@/engine/models/linearRegression";
+import { createVanillaSgd } from "@/engine/updateRules/vanillaSgd";
+import { createSingleSample } from "@/engine/batchStrategies/singleSample";
+import { generateData } from "@/engine/data";
+import type { StepResult, DataPoint, Parameters, GDConfig, ComputationStep, ComputationPhase } from "@/engine/types";
 
 const DEFAULT_DATA = generateData(10, 42);
 const TOTAL_EPOCHS = 12;

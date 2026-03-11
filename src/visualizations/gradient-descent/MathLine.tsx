@@ -1,4 +1,4 @@
-import type { ComputationStep } from "../engine/types";
+import type { ComputationStep } from "@/engine/types";
 
 export function MathLine({ step }: { step: ComputationStep }) {
   return (

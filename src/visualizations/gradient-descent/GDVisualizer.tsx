@@ -1,6 +1,6 @@
 import { ScatterPlot } from "./ScatterPlot";
 import { ComputationPanel } from "./ComputationPanel";
-import type { DataPoint, Parameters, StepResult, ComputationStep } from "../engine/types";
+import type { DataPoint, Parameters, StepResult, ComputationStep } from "@/engine/types";
 
 interface Props {
   data: DataPoint[];
@@ -18,7 +18,7 @@ interface Props {
   subStepCount: number;
 }
 
-export function Visualizer({
+export function GDVisualizer({
   data,
   activeIndices,
   params,
