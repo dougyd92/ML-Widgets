@@ -14,6 +14,7 @@ interface Props {
   data: DataPoint[];
   activeIndices: number[];
   params: Parameters;
+  showResidualLine: boolean;
 }
 
 // Custom dot renderer for highlighting active points
@@ -61,7 +62,7 @@ function computeFixedDomain(data: DataPoint[]) {
   return { xMin, xMax, yMin, yMax };
 }
 
-export function ScatterPlot({ data, activeIndices, params }: Props) {
+export function ScatterPlot({ data, activeIndices, params, showResidualLine }: Props) {
   const w0 = params.values.w0;
   const w1 = params.values.w1;
 
@@ -119,7 +120,7 @@ export function ScatterPlot({ data, activeIndices, params }: Props) {
         />
 
         {/* Residual dashed line */}
-        {activePoint && activePrediction !== null && (
+        {showResidualLine && activePoint && activePrediction !== null && (
           <ReferenceLine
             segment={[
               { x: activePoint.x, y: activePoint.y },

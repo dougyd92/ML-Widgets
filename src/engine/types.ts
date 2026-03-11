@@ -14,10 +14,13 @@ export interface GradientResult {
   loss: number;
 }
 
+export type ComputationPhase = 'params' | 'forward' | 'residual' | 'gradient' | 'update';
+
 export interface ComputationStep {
   label: string;
   expression: string;
   color?: string;
+  phase: ComputationPhase;
 }
 
 export interface Model {

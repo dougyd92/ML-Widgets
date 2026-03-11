@@ -63,11 +63,13 @@ export const linearRegression: Model = {
       {
         label: "Forward pass (prediction)",
         expression: `ŷ = w₀ + w₁·x = ${fmt(w0)} + ${fmt(w1)} · ${fmt(point.x)} = ${fmt(yHat)}`,
+        phase: "forward",
       },
       {
         label: "Error",
         expression: `residual = ŷ - y = ${fmt(yHat)} - ${fmt(point.y)} = ${fmt(yHat - point.y)}`,
         color: "#ef4444",
+        phase: "residual",
       },
     ];
   },
@@ -84,10 +86,12 @@ export const linearRegression: Model = {
       {
         label: "∂L/∂w₀",
         expression: `2(ŷ - y) = 2(${fmt(residual)}) = ${fmt(2 * residual)}`,
+        phase: "gradient",
       },
       {
         label: "∂L/∂w₁",
         expression: `2(ŷ - y)·x = 2(${fmt(residual)})·${fmt(point.x)} = ${fmt(2 * residual * point.x)}`,
+        phase: "gradient",
       },
     ];
   },

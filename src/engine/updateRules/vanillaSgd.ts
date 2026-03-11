@@ -43,6 +43,7 @@ export function createVanillaSgd(): UpdateRule {
         steps.push({
           label: `w${sub}`,
           expression: `${fmt(oldVal)} - ${lr}·(${fmt(grad)}) = ${fmt(newVal)}`,
+          phase: "update",
         });
       }
 

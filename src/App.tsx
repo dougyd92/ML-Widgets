@@ -68,11 +68,15 @@ function App() {
           activeIndices={activeIndices}
           params={gd.currentParams}
           stepResult={gd.currentStep}
+          visibleComputationSteps={gd.visibleComputationSteps}
+          showResidualLine={gd.showResidualLine}
           stepNumber={gd.stepNumber}
           totalSteps={gd.totalSteps}
           epoch={gd.currentEpoch}
           sampleIndexInEpoch={gd.sampleIndexInEpoch}
           samplesPerEpoch={gd.samplesPerEpoch}
+          subStep={gd.subStep}
+          subStepCount={gd.subStepCount}
         />
       </div>
 

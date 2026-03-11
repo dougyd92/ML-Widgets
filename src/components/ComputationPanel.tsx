@@ -1,22 +1,28 @@
-import type { StepResult } from "../engine/types";
+import type { StepResult, ComputationStep } from "../engine/types";
 import { MathLine } from "./MathLine";
 
 interface Props {
   stepResult: StepResult | null;
+  visibleComputationSteps: ComputationStep[];
   stepNumber: number;
   totalSteps: number;
   epoch: number;
   sampleIndexInEpoch: number;
   samplesPerEpoch: number;
+  subStep: number;
+  subStepCount: number;
 }
 
 export function ComputationPanel({
   stepResult,
+  visibleComputationSteps,
   stepNumber,
   totalSteps,
   epoch,
   sampleIndexInEpoch,
   samplesPerEpoch,
+  subStep,
+  subStepCount,
 }: Props) {
   if (!stepResult) {
     return (
@@ -33,12 +39,14 @@ export function ComputationPanel({
   return (
     <div className="bg-gray-50 rounded-lg p-5 h-full overflow-y-auto">
       <div className="text-sm text-gray-500 mb-4 font-medium">
-        Step {stepNumber} of {totalSteps} &nbsp;|&nbsp; Epoch{" "}
+        Step {stepNumber} of {totalSteps}{" "}
+        <span className="text-gray-400">({subStep + 1}/{subStepCount})</span>
+        &nbsp;|&nbsp; Epoch{" "}
         {epoch + 1}, Sample {sampleIndexInEpoch + 1} of {samplesPerEpoch}
       </div>
 
       <div className="space-y-1">
-        {stepResult.computationSteps.map((step, i) => (
+        {visibleComputationSteps.map((step, i) => (
           <MathLine key={i} step={step} />
         ))}
       </div>

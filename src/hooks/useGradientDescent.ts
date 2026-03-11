@@ -4,15 +4,18 @@ import { linearRegression } from "../engine/models/linearRegression";
 import { createVanillaSgd } from "../engine/updateRules/vanillaSgd";
 import { createSingleSample } from "../engine/batchStrategies/singleSample";
 import { generateData } from "../engine/data";
-import type { StepResult, DataPoint, Parameters, GDConfig } from "../engine/types";
+import type { StepResult, DataPoint, Parameters, GDConfig, ComputationStep, ComputationPhase } from "../engine/types";
 
 const DEFAULT_DATA = generateData(10, 42);
 const TOTAL_EPOCHS = 12;
+const SUB_STEP_COUNT = 5;
+const PHASE_ORDER: ComputationPhase[] = ['params', 'forward', 'residual', 'gradient', 'update'];
 
 export function useGradientDescent(config: GDConfig) {
   const engineRef = useRef<GDEngine | null>(null);
   const [history, setHistory] = useState<StepResult[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
+  const [subStep, setSubStep] = useState(0);
 
   // Initialize engine lazily
   if (engineRef.current === null) {
@@ -34,15 +37,23 @@ export function useGradientDescent(config: GDConfig) {
     [history, currentStepIndex]
   );
 
-  const currentParams: Parameters = useMemo(
-    () => currentStep?.paramsAfter ?? linearRegression.initialParameters(),
-    [currentStep]
-  );
+  const currentParams: Parameters = useMemo(() => {
+    if (!currentStep) return linearRegression.initialParameters();
+    return subStep >= SUB_STEP_COUNT - 1 ? currentStep.paramsAfter : currentStep.paramsBefore;
+  }, [currentStep, subStep]);
 
   const currentLoss: number = useMemo(() => {
-    if (currentStep) return currentStep.lossAfter;
-    return engine.computeFullLoss(linearRegression.initialParameters());
-  }, [currentStep, engine]);
+    if (!currentStep) return engine.computeFullLoss(linearRegression.initialParameters());
+    return subStep >= SUB_STEP_COUNT - 1 ? currentStep.lossAfter : currentStep.lossBefore;
+  }, [currentStep, subStep, engine]);
+
+  const visibleComputationSteps: ComputationStep[] = useMemo(() => {
+    if (!currentStep) return [];
+    const visiblePhases = new Set(PHASE_ORDER.slice(0, subStep + 1));
+    return currentStep.computationSteps.filter(s => visiblePhases.has(s.phase));
+  }, [currentStep, subStep]);
+
+  const showResidualLine = subStep >= 2 && subStep <= 3;
 
   const lossHistory: number[] = useMemo(
     () => history.slice(0, currentStepIndex + 1).map((s) => s.lossAfter),
@@ -60,9 +71,15 @@ export function useGradientDescent(config: GDConfig) {
   }, [currentStep, currentStepIndex, data.length]);
 
   const canGoBack = currentStepIndex > -1;
-  const canGoForward = currentStepIndex < maxSteps - 1;
+  const canGoForward = currentStepIndex < maxSteps - 1 || (currentStepIndex === maxSteps - 1 && subStep < SUB_STEP_COUNT - 1);
 
   const next = useCallback(() => {
+    // Advance within current step's sub-steps
+    if (currentStep && subStep < SUB_STEP_COUNT - 1) {
+      setSubStep(s => s + 1);
+      return;
+    }
+
     if (!canGoForward) return;
 
     const nextIndex = currentStepIndex + 1;
@@ -84,17 +101,24 @@ export function useGradientDescent(config: GDConfig) {
       setHistory((prev) => [...prev.slice(0, nextIndex), result]);
       setCurrentStepIndex(nextIndex);
     }
-  }, [canGoForward, currentStepIndex, history.length, currentStep, engine, config.learningRate]);
+    setSubStep(0);
+  }, [canGoForward, currentStepIndex, history.length, currentStep, engine, config.learningRate, subStep]);
 
   const prev = useCallback(() => {
+    if (subStep > 0) {
+      setSubStep(s => s - 1);
+      return;
+    }
     if (!canGoBack) return;
     setCurrentStepIndex((i) => i - 1);
-  }, [canGoBack]);
+    setSubStep(SUB_STEP_COUNT - 1);
+  }, [subStep, canGoBack]);
 
   const reset = useCallback(() => {
     engine.reset();
     setHistory([]);
     setCurrentStepIndex(-1);
+    setSubStep(0);
   }, [engine]);
 
   const setLearningRate = useCallback(
@@ -120,6 +144,10 @@ export function useGradientDescent(config: GDConfig) {
     totalSteps: maxSteps,
     canGoBack,
     canGoForward,
+    subStep,
+    subStepCount: SUB_STEP_COUNT,
+    visibleComputationSteps,
+    showResidualLine,
     next,
     prev,
     reset,

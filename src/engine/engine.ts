@@ -60,6 +60,7 @@ export class GDEngine {
     computationSteps.push({
       label: "Current parameters",
       expression: paramStr,
+      phase: "params",
     });
 
     // Forward pass and error

@@ -30,7 +30,8 @@ export function ConfigPanel({
         <input
           type="range"
           min="0.001"
-          max="0.1"
+          // max="0.1" TODO
+          max="0.5"
           step="0.001"
           value={learningRate}
           onChange={(e) => onLearningRateChange(parseFloat(e.target.value))}
