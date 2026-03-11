@@ -62,7 +62,7 @@ function App() {
       />
 
       {/* Main visualization area */}
-      <div className="flex-1 min-h-0 p-4">
+      <div className="flex-1 min-h-0 p-4 flex flex-col">
         <Visualizer
           data={gd.data}
           activeIndices={activeIndices}

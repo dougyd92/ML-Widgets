@@ -26,7 +26,7 @@ export function Visualizer({
   samplesPerEpoch,
 }: Props) {
   return (
-    <div className="flex flex-1 gap-4 min-h-0">
+    <div className="flex flex-1 gap-4 min-h-0 h-full">
       {/* Left: Scatter plot */}
       <div className="flex-1 min-w-0 bg-white rounded-lg border border-gray-200 p-2">
         <ScatterPlot
@@ -37,7 +37,7 @@ export function Visualizer({
       </div>
 
       {/* Right: Computation panel */}
-      <div className="w-[420px] shrink-0">
+      <div className="w-[420px] shrink-0 overflow-y-auto">
         <ComputationPanel
           stepResult={stepResult}
           stepNumber={stepNumber}

@@ -31,20 +31,20 @@ export function LossTracker({ currentLoss, lossHistory }: Props) {
           {currentLoss.toFixed(3)}
         </span>
       </div>
-      {lossHistory.length > 1 && (
-        <svg
-          width={width}
-          height={height}
-          className="bg-gray-100 rounded"
-        >
+      <svg
+        width={width}
+        height={height}
+        className="bg-gray-100 rounded"
+      >
+        {pathD && (
           <path
             d={pathD}
             fill="none"
             stroke="#3b82f6"
             strokeWidth="1.5"
           />
-        </svg>
-      )}
+        )}
+      </svg>
     </div>
   );
 }
