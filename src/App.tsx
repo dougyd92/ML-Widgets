@@ -2,9 +2,18 @@ import { Layout } from "./components/Layout";
 import { HomePage } from "./pages/HomePage";
 import { GradientDescentPage } from "./visualizations/gradient-descent/GradientDescentPage";
 import { DecisionBoundaryPage } from "./visualizations/decision-boundary/DecisionBoundaryPage";
+import { RegularizationGeometryPage } from "./visualizations/regularization-geometry/RegularizationGeometryPage";
 
 function App() {
   const path = window.location.pathname;
+
+  if (path.startsWith("/viz/regularization-geometry")) {
+    return (
+      <Layout title="Regularization Geometry">
+        <RegularizationGeometryPage />
+      </Layout>
+    );
+  }
 
   if (path.startsWith("/viz/gradient-descent")) {
     return (

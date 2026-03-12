@@ -11,6 +11,12 @@ const visualizations = [
     path: "/viz/decision_boundary",
     color: "from-rose-500 to-orange-500",
   },
+  {
+    title: "Regularization Geometry",
+    description: "See why L1 produces sparsity and L2 doesn't — constraint shapes meet loss contours.",
+    path: "/viz/regularization-geometry",
+    color: "from-violet-500 to-purple-600",
+  },
 ];
 
 export function HomePage() {
