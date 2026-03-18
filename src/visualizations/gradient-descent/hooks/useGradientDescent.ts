@@ -2,7 +2,7 @@ import { useState, useRef, useMemo, useCallback } from "react";
 import { GDEngine } from "@/engine/engine";
 import { linearRegression } from "@/engine/models/linearRegression";
 import { createVanillaSgd } from "@/engine/updateRules/vanillaSgd";
-import { createSingleSample } from "@/engine/batchStrategies/singleSample";
+import { createMiniBatch } from "@/engine/batchStrategies/miniBatch";
 import { generateData } from "@/engine/data";
 import type { StepResult, DataPoint, Parameters, GDConfig, ComputationStep, ComputationPhase } from "@/engine/types";
 
@@ -22,7 +22,7 @@ export function useGradientDescent(config: GDConfig) {
     engineRef.current = new GDEngine(
       linearRegression,
       createVanillaSgd(),
-      createSingleSample(),
+      createMiniBatch(config.batchSize),
       DEFAULT_DATA,
       config.learningRate
     );
@@ -30,7 +30,8 @@ export function useGradientDescent(config: GDConfig) {
 
   const engine = engineRef.current;
   const data: DataPoint[] = engine.getData();
-  const maxSteps = TOTAL_EPOCHS * data.length;
+  const stepsPerEpoch = Math.ceil(data.length / config.batchSize);
+  const maxSteps = TOTAL_EPOCHS * stepsPerEpoch;
 
   const currentStep: StepResult | null = useMemo(
     () => (currentStepIndex >= 0 ? history[currentStepIndex] : null),
@@ -62,13 +63,13 @@ export function useGradientDescent(config: GDConfig) {
 
   const currentEpoch: number = useMemo(() => {
     if (!currentStep) return 0;
-    return Math.floor(currentStepIndex / data.length);
-  }, [currentStep, currentStepIndex, data.length]);
+    return Math.floor(currentStepIndex / stepsPerEpoch);
+  }, [currentStep, currentStepIndex, stepsPerEpoch]);
 
   const sampleIndexInEpoch: number = useMemo(() => {
     if (!currentStep) return 0;
-    return currentStepIndex % data.length;
-  }, [currentStep, currentStepIndex, data.length]);
+    return currentStepIndex % stepsPerEpoch;
+  }, [currentStep, currentStepIndex, stepsPerEpoch]);
 
   const canGoBack = currentStepIndex > -1;
   const canGoForward = currentStepIndex < maxSteps - 1 || (currentStepIndex === maxSteps - 1 && subStep < SUB_STEP_COUNT - 1);
@@ -130,6 +131,17 @@ export function useGradientDescent(config: GDConfig) {
     [currentStepIndex]
   );
 
+  const setBatchSize = useCallback(
+    (size: number) => {
+      engine.setBatchStrategy(createMiniBatch(size));
+      engine.reset();
+      setHistory([]);
+      setCurrentStepIndex(-1);
+      setSubStep(0);
+    },
+    [engine]
+  );
+
   return {
     data,
     currentStep,
@@ -139,7 +151,7 @@ export function useGradientDescent(config: GDConfig) {
     currentEpoch,
     sampleIndexInEpoch,
     totalEpochs: TOTAL_EPOCHS,
-    samplesPerEpoch: data.length,
+    samplesPerEpoch: stepsPerEpoch,
     stepNumber: currentStepIndex + 1,
     totalSteps: maxSteps,
     canGoBack,
@@ -152,5 +164,6 @@ export function useGradientDescent(config: GDConfig) {
     prev,
     reset,
     setLearningRate,
+    setBatchSize,
   };
 }

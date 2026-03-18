@@ -104,6 +104,8 @@ export class GDEngine {
       paramsAfter: { values: { ...paramsAfter.values } },
       prediction: gradResult.prediction,
       residual: gradResult.residual,
+      predictions: [...gradResult.predictions],
+      residuals: [...gradResult.residuals],
       gradients: { ...gradResult.gradients },
       lossBefore,
       lossAfter,
@@ -139,6 +141,12 @@ export class GDEngine {
 
   getModel(): Model {
     return this.model;
+  }
+
+  setBatchStrategy(strategy: BatchStrategy) {
+    this.batchStrategy = strategy;
+    this.batchStrategy.init(this.data);
+    this.stepCount = 0;
   }
 
   reset() {

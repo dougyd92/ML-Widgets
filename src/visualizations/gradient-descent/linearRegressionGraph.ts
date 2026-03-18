@@ -27,7 +27,7 @@ const ALL_EDGE_IDS = LINEAR_REGRESSION_GRAPH.edges.map((e) => e.id);
 export function computeHighlightState(
   subStep: number,
   stepResult: StepResult | null,
-  samplePoint: DataPoint | null
+  samplePoints: DataPoint[]
 ): GraphHighlightState {
   // Initial / no step yet
   if (!stepResult) {
@@ -45,8 +45,13 @@ export function computeHighlightState(
     stepResult;
   const w0 = paramsBefore.values.w0;
   const w1 = paramsBefore.values.w1;
-  const x = samplePoint?.x ?? 0;
-  const y = samplePoint?.y ?? 0;
+  const isBatch = samplePoints.length > 1;
+  const x = samplePoints.length > 0 ? samplePoints[0].x : 0;
+  const y = samplePoints.length > 0 ? samplePoints[0].y : 0;
+
+  // For batch mode, labels show aggregated values
+  const inputX1Label = isBatch ? `batch(${samplePoints.length})` : fmt(x);
+  const predLabel = isBatch ? "ŷ_avg = " + fmt(prediction) : "ŷ = " + fmt(prediction);
 
   switch (subStep) {
     case 0: // params
@@ -66,10 +71,10 @@ export function computeHighlightState(
         activeEdges: new Set(ALL_EDGE_IDS),
         nodeValues: {
           "input-bias": "1",
-          "input-x1": fmt(x),
+          "input-x1": inputX1Label,
           w0: fmt(w0),
           w1: fmt(w1),
-          sum: "ŷ = " + fmt(prediction),
+          sum: predLabel,
         },
         edgeValues: {},
         nodeDeltas: {},
@@ -77,28 +82,27 @@ export function computeHighlightState(
         accentColor: "#3b82f6",
       };
 
-    case 2: // residual
+    case 2: { // residual
+      const residualLabel = isBatch
+        ? predLabel + "\navg residual = " + fmt(residual)
+        : "ŷ = " + fmt(prediction) + "\ny = " + fmt(y) + "\nresidual = " + fmt(residual);
+
       return {
         activeNodes: new Set(ALL_NODE_IDS),
         activeEdges: new Set(ALL_EDGE_IDS),
         nodeValues: {
           "input-bias": "1",
-          "input-x1": fmt(x),
+          "input-x1": inputX1Label,
           w0: fmt(w0),
           w1: fmt(w1),
-          sum:
-            "ŷ = " +
-            fmt(prediction) +
-            "\ny = " +
-            fmt(y) +
-            "\nresidual = " +
-            fmt(residual),
+          sum: residualLabel,
         },
         edgeValues: {},
         nodeDeltas: {},
         flowDirection: "forward",
         accentColor: "#ef4444",
       };
+    }
 
     case 3: // gradient
       return {
@@ -107,7 +111,7 @@ export function computeHighlightState(
         nodeValues: {
           w0: fmt(w0),
           w1: fmt(w1),
-          sum: "ŷ = " + fmt(prediction),
+          sum: predLabel,
         },
         edgeValues: {
           "w0-to-sum": "∂L/∂w₀ = " + fmt(gradients.w0),

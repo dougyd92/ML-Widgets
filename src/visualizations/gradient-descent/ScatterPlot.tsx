@@ -75,12 +75,9 @@ export function ScatterPlot({ data, activeIndices, params, showResidualLine }: P
     { x: xMax, y: w0 + w1 * xMax },
   ];
 
-  // Residual line data
-  const activePoint =
-    activeIndices.length > 0 ? data[activeIndices[0]] : null;
-  const activePrediction = activePoint
-    ? w0 + w1 * activePoint.x
-    : null;
+  // Residual line data for all active batch points
+  const activePoints = activeIndices.map((i) => data[i]).filter(Boolean);
+  const batchSize = activePoints.length;
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -119,18 +116,23 @@ export function ScatterPlot({ data, activeIndices, params, showResidualLine }: P
           isAnimationActive={false}
         />
 
-        {/* Residual dashed line */}
-        {showResidualLine && activePoint && activePrediction !== null && (
-          <ReferenceLine
-            segment={[
-              { x: activePoint.x, y: activePoint.y },
-              { x: activePoint.x, y: activePrediction },
-            ]}
-            stroke="#ef4444"
-            strokeDasharray="4 4"
-            strokeWidth={2}
-          />
-        )}
+        {/* Residual dashed lines */}
+        {showResidualLine && activePoints.map((point, i) => {
+          const pred = w0 + w1 * point.x;
+          return (
+            <ReferenceLine
+              key={`residual-${i}`}
+              segment={[
+                { x: point.x, y: point.y },
+                { x: point.x, y: pred },
+              ]}
+              stroke="#ef4444"
+              strokeDasharray="4 4"
+              strokeWidth={2}
+              strokeOpacity={batchSize > 1 ? 0.6 : 1}
+            />
+          );
+        })}
 
         {/* Data points */}
         <Scatter

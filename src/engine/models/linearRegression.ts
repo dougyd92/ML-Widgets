@@ -23,29 +23,35 @@ export const linearRegression: Model = {
   },
 
   computeGradients(params: Parameters, points: DataPoint[]): GradientResult {
-    // For single-sample SGD, points has one element
-    // For mini-batch, average over the batch
-    let totalResidual = 0;
+    const predictions: number[] = [];
+    const residuals: number[] = [];
     let dw0 = 0;
     let dw1 = 0;
     let totalLoss = 0;
 
     for (const point of points) {
-      const prediction = this.predict(params, point.x);
-      const residual = prediction - point.y;
-      totalResidual += residual;
-      dw0 += 2 * residual;
-      dw1 += 2 * residual * point.x;
-      totalLoss += residual * residual;
+      const pred = this.predict(params, point.x);
+      const res = pred - point.y;
+      predictions.push(pred);
+      residuals.push(res);
+      dw0 += 2 * res;
+      dw1 += 2 * res * point.x;
+      totalLoss += res * res;
     }
 
     const n = points.length;
-    const prediction = this.predict(params, points[0].x);
-    const residual = prediction - points[0].y;
+    const meanPrediction = n === 1
+      ? predictions[0]
+      : predictions.reduce((a, b) => a + b, 0) / n;
+    const meanResidual = n === 1
+      ? residuals[0]
+      : residuals.reduce((a, b) => a + b, 0) / n;
 
     return {
-      prediction,
-      residual,
+      prediction: meanPrediction,
+      residual: meanResidual,
+      predictions,
+      residuals,
       gradients: { w0: dw0 / n, w1: dw1 / n },
       loss: totalLoss / n,
     };
@@ -55,19 +61,47 @@ export const linearRegression: Model = {
     params: Parameters,
     points: DataPoint[]
   ): ComputationStep[] {
-    const point = points[0];
     const { w0, w1 } = params.values;
-    const yHat = this.predict(params, point.x);
+
+    if (points.length === 1) {
+      const point = points[0];
+      const yHat = this.predict(params, point.x);
+      return [
+        {
+          label: "Forward pass (prediction)",
+          expression: `ŷ = w₀ + w₁·x = ${fmt(w0)} + ${fmt(w1)} · ${fmt(point.x)} = ${fmt(yHat)}`,
+          phase: "forward",
+        },
+        {
+          label: "Error",
+          expression: `residual = ŷ - y = ${fmt(yHat)} - ${fmt(point.y)} = ${fmt(yHat - point.y)}`,
+          color: "#ef4444",
+          phase: "residual",
+        },
+      ];
+    }
+
+    // Batch mode
+    const n = points.length;
+    const preds = points.map((p) => this.predict(params, p.x));
+    const residuals = points.map((p, i) => preds[i] - p.y);
+    const meanPred = preds.reduce((a, b) => a + b, 0) / n;
+    const meanRes = residuals.reduce((a, b) => a + b, 0) / n;
 
     return [
       {
-        label: "Forward pass (prediction)",
-        expression: `ŷ = w₀ + w₁·x = ${fmt(w0)} + ${fmt(w1)} · ${fmt(point.x)} = ${fmt(yHat)}`,
+        label: `Batch (${n} samples)`,
+        expression: `x = [${points.map((p) => fmt(p.x)).join(", ")}]`,
         phase: "forward",
       },
       {
-        label: "Error",
-        expression: `residual = ŷ - y = ${fmt(yHat)} - ${fmt(point.y)} = ${fmt(yHat - point.y)}`,
+        label: "Mean prediction",
+        expression: `ŷ_avg = (1/${n}) Σ (w₀ + w₁·xᵢ) = ${fmt(meanPred)}`,
+        phase: "forward",
+      },
+      {
+        label: "Mean error",
+        expression: `avg residual = (1/${n}) Σ (ŷᵢ - yᵢ) = ${fmt(meanRes)}`,
         color: "#ef4444",
         phase: "residual",
       },
@@ -78,19 +112,43 @@ export const linearRegression: Model = {
     params: Parameters,
     points: DataPoint[]
   ): ComputationStep[] {
-    const point = points[0];
-    const yHat = this.predict(params, point.x);
-    const residual = yHat - point.y;
+    if (points.length === 1) {
+      const point = points[0];
+      const yHat = this.predict(params, point.x);
+      const residual = yHat - point.y;
+      return [
+        {
+          label: "∂L/∂w₀",
+          expression: `2(ŷ - y) = 2(${fmt(residual)}) = ${fmt(2 * residual)}`,
+          phase: "gradient",
+        },
+        {
+          label: "∂L/∂w₁",
+          expression: `2(ŷ - y)·x = 2(${fmt(residual)})·${fmt(point.x)} = ${fmt(2 * residual * point.x)}`,
+          phase: "gradient",
+        },
+      ];
+    }
+
+    // Batch mode — show averaged gradients
+    const n = points.length;
+    let dw0 = 0;
+    let dw1 = 0;
+    for (const point of points) {
+      const res = this.predict(params, point.x) - point.y;
+      dw0 += 2 * res;
+      dw1 += 2 * res * point.x;
+    }
 
     return [
       {
         label: "∂L/∂w₀",
-        expression: `2(ŷ - y) = 2(${fmt(residual)}) = ${fmt(2 * residual)}`,
+        expression: `(1/${n}) Σ 2(ŷᵢ - yᵢ) = ${fmt(dw0 / n)}`,
         phase: "gradient",
       },
       {
         label: "∂L/∂w₁",
-        expression: `2(ŷ - y)·x = 2(${fmt(residual)})·${fmt(point.x)} = ${fmt(2 * residual * point.x)}`,
+        expression: `(1/${n}) Σ 2(ŷᵢ - yᵢ)·xᵢ = ${fmt(dw1 / n)}`,
         phase: "gradient",
       },
     ];

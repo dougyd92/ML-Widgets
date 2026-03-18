@@ -14,6 +14,7 @@ export function GradientDescentPage() {
     learningRate: 0.01,
     totalEpochs: 12,
     autoPlaySpeed: 1,
+    batchSize: 1,
   });
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -40,6 +41,7 @@ export function GradientDescentPage() {
       <ConfigPanel
         learningRate={config.learningRate}
         speedMultiplier={config.autoPlaySpeed}
+        batchSize={config.batchSize}
         onLearningRateChange={(lr) => {
           setConfig((c) => ({ ...c, learningRate: lr }));
           gd.setLearningRate(lr);
@@ -47,6 +49,11 @@ export function GradientDescentPage() {
         onSpeedChange={(multiplier) =>
           setConfig((c) => ({ ...c, autoPlaySpeed: multiplier }))
         }
+        onBatchSizeChange={(size) => {
+          setConfig((c) => ({ ...c, batchSize: size }));
+          gd.setBatchSize(size);
+          setIsPlaying(false);
+        }}
       />
 
       {/* Main visualization area */}

@@ -10,6 +10,8 @@ export interface Parameters {
 export interface GradientResult {
   prediction: number;
   residual: number;
+  predictions: number[];
+  residuals: number[];
   gradients: Record<string, number>;
   loss: number;
 }
@@ -67,6 +69,8 @@ export interface StepResult {
   paramsAfter: Parameters;
   prediction: number;
   residual: number;
+  predictions: number[];
+  residuals: number[];
   gradients: Record<string, number>;
   lossBefore: number;
   lossAfter: number;
@@ -77,4 +81,5 @@ export interface GDConfig {
   learningRate: number;
   totalEpochs: number;
   autoPlaySpeed: number;
+  batchSize: number;
 }

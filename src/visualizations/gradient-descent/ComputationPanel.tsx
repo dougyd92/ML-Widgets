@@ -29,15 +29,14 @@ export function ComputationPanel({
   subStepCount,
   data,
 }: Props) {
-  const samplePoint = useMemo(() => {
-    if (!stepResult) return null;
-    const idx = stepResult.sampleIndices[0];
-    return data[idx] ?? null;
+  const samplePoints = useMemo(() => {
+    if (!stepResult) return [];
+    return stepResult.sampleIndices.map((idx) => data[idx]).filter(Boolean);
   }, [stepResult, data]);
 
   const highlight = useMemo(
-    () => computeHighlightState(subStep, stepResult, samplePoint),
-    [subStep, stepResult, samplePoint]
+    () => computeHighlightState(subStep, stepResult, samplePoints),
+    [subStep, stepResult, samplePoints]
   );
 
   if (!stepResult) {
@@ -69,7 +68,9 @@ export function ComputationPanel({
         Step {stepNumber} of {totalSteps}{" "}
         <span className="text-gray-400">({subStep + 1}/{subStepCount})</span>
         &nbsp;|&nbsp; Epoch{" "}
-        {epoch + 1}, Sample {sampleIndexInEpoch + 1} of {samplesPerEpoch}
+        {epoch + 1}, {samplePoints.length > 1
+          ? `Batch ${sampleIndexInEpoch + 1} of ${samplesPerEpoch} (${samplePoints.length} samples)`
+          : `Sample ${sampleIndexInEpoch + 1} of ${samplesPerEpoch}`}
       </div>
 
       <div className="space-y-1">

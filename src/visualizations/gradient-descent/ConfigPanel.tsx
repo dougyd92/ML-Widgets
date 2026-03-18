@@ -4,18 +4,28 @@ function formatMultiplier(m: number): string {
   return `${m}x`;
 }
 
+const BATCH_OPTIONS = [
+  { value: 1, label: "SGD (1)" },
+  { value: 4, label: "Mini-batch (4)" },
+  { value: 10, label: "Full Batch (10)" },
+];
+
 interface Props {
   learningRate: number;
   speedMultiplier: number;
+  batchSize: number;
   onLearningRateChange: (lr: number) => void;
   onSpeedChange: (multiplier: number) => void;
+  onBatchSizeChange: (size: number) => void;
 }
 
 export function ConfigPanel({
   learningRate,
   speedMultiplier,
+  batchSize,
   onLearningRateChange,
   onSpeedChange,
+  onBatchSizeChange,
 }: Props) {
   // Map slider position (0..SPEED_STEPS.length-1) to multiplier
   const sliderIndex = SPEED_STEPS.indexOf(speedMultiplier);
@@ -55,6 +65,26 @@ export function ConfigPanel({
           {formatMultiplier(speedMultiplier)}
         </span>
       </label>
+      <div className="flex items-center gap-3 text-sm">
+        <span className="text-gray-600 font-medium whitespace-nowrap">
+          Batch size:
+        </span>
+        <div className="flex rounded-md overflow-hidden border border-gray-300">
+          {BATCH_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => onBatchSizeChange(opt.value)}
+              className={`px-3 py-1 text-xs font-medium transition-colors ${
+                batchSize === opt.value
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-gray-600 hover:bg-gray-100"
+              } ${opt.value !== BATCH_OPTIONS[0].value ? "border-l border-gray-300" : ""}`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -54,7 +54,7 @@ describe('LINEAR_REGRESSION_GRAPH definition', () => {
 
 describe('computeHighlightState', () => {
   it('returns safe defaults for null stepResult', () => {
-    const state = computeHighlightState(0, null, null)
+    const state = computeHighlightState(0, null, [])
     expect(state.activeNodes.size).toBe(0)
     expect(state.activeEdges.size).toBe(0)
     expect(state.nodeValues.w0).toBe('0.000')
@@ -66,7 +66,7 @@ describe('computeHighlightState', () => {
     const { stepResult, samplePoint } = createFixture()
 
     it('subStep 0 (params): highlights only w0, w1 with blue accent', () => {
-      const state = computeHighlightState(0, stepResult, samplePoint)
+      const state = computeHighlightState(0, stepResult, [samplePoint])
       expect(state.activeNodes).toEqual(new Set(['w0', 'w1']))
       expect(state.activeEdges.size).toBe(0)
       expect(state.flowDirection).toBe('none')
@@ -76,7 +76,7 @@ describe('computeHighlightState', () => {
     })
 
     it('subStep 1 (forward): all nodes/edges active, forward flow, blue accent', () => {
-      const state = computeHighlightState(1, stepResult, samplePoint)
+      const state = computeHighlightState(1, stepResult, [samplePoint])
       expect(state.activeNodes.size).toBe(5)
       expect(state.activeEdges.size).toBe(4)
       expect(state.flowDirection).toBe('forward')
@@ -86,7 +86,7 @@ describe('computeHighlightState', () => {
     })
 
     it('subStep 2 (residual): red accent, shows residual in sum', () => {
-      const state = computeHighlightState(2, stepResult, samplePoint)
+      const state = computeHighlightState(2, stepResult, [samplePoint])
       expect(state.activeNodes.size).toBe(5)
       expect(state.accentColor).toBe('#ef4444')
       expect(state.nodeValues.sum).toContain('residual')
@@ -94,7 +94,7 @@ describe('computeHighlightState', () => {
     })
 
     it('subStep 3 (gradient): backward flow, purple accent, edge gradient labels', () => {
-      const state = computeHighlightState(3, stepResult, samplePoint)
+      const state = computeHighlightState(3, stepResult, [samplePoint])
       expect(state.activeNodes.size).toBe(5)
       expect(state.activeEdges.size).toBe(4)
       expect(state.flowDirection).toBe('backward')
@@ -104,7 +104,7 @@ describe('computeHighlightState', () => {
     })
 
     it('subStep 4 (update): only w0/w1, green accent, shows deltas', () => {
-      const state = computeHighlightState(4, stepResult, samplePoint)
+      const state = computeHighlightState(4, stepResult, [samplePoint])
       expect(state.activeNodes).toEqual(new Set(['w0', 'w1']))
       expect(state.activeEdges.size).toBe(0)
       expect(state.flowDirection).toBe('none')
@@ -116,7 +116,7 @@ describe('computeHighlightState', () => {
     })
 
     it('default case (subStep > 4): returns empty state', () => {
-      const state = computeHighlightState(99, stepResult, samplePoint)
+      const state = computeHighlightState(99, stepResult, [samplePoint])
       expect(state.activeNodes.size).toBe(0)
       expect(state.activeEdges.size).toBe(0)
       expect(state.flowDirection).toBe('none')

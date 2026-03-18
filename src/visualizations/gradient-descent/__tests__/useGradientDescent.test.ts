@@ -6,6 +6,7 @@ const defaultConfig: GDConfig = {
   learningRate: 0.01,
   totalEpochs: 12,
   autoPlaySpeed: 1,
+  batchSize: 1,
 }
 
 function renderGD(config: GDConfig = defaultConfig) {
