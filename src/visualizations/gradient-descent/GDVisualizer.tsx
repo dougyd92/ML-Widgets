@@ -18,6 +18,7 @@ interface Props {
   subStepCount: number;
 }
 
+
 export function GDVisualizer({
   data,
   activeIndices,
@@ -57,6 +58,7 @@ export function GDVisualizer({
           samplesPerEpoch={samplesPerEpoch}
           subStep={subStep}
           subStepCount={subStepCount}
+          data={data}
         />
       </div>
     </div>

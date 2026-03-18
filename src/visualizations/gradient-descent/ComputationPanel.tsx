@@ -1,5 +1,8 @@
-import type { StepResult, ComputationStep } from "@/engine/types";
+import { useMemo } from "react";
+import type { StepResult, ComputationStep, DataPoint } from "@/engine/types";
 import { MathLine } from "./MathLine";
+import { ComputationGraph } from "./ComputationGraph";
+import { LINEAR_REGRESSION_GRAPH, computeHighlightState } from "./linearRegressionGraph";
 
 interface Props {
   stepResult: StepResult | null;
@@ -11,6 +14,7 @@ interface Props {
   samplesPerEpoch: number;
   subStep: number;
   subStepCount: number;
+  data: DataPoint[];
 }
 
 export function ComputationPanel({
@@ -23,22 +27,45 @@ export function ComputationPanel({
   samplesPerEpoch,
   subStep,
   subStepCount,
+  data,
 }: Props) {
+  const samplePoint = useMemo(() => {
+    if (!stepResult) return null;
+    const idx = stepResult.sampleIndices[0];
+    return data[idx] ?? null;
+  }, [stepResult, data]);
+
+  const highlight = useMemo(
+    () => computeHighlightState(subStep, stepResult, samplePoint),
+    [subStep, stepResult, samplePoint]
+  );
+
   if (!stepResult) {
     return (
-      <div className="bg-gray-50 rounded-lg p-6 h-full flex flex-col justify-center items-center text-gray-500">
-        <div className="text-lg font-medium mb-2">Initial State</div>
-        <div className="text-sm">
-          Parameters: w₀ = 0.000, w₁ = 0.000
+      <div className="bg-gray-50 rounded-lg p-5 h-full flex flex-col">
+        <ComputationGraph
+          graph={LINEAR_REGRESSION_GRAPH}
+          highlight={highlight}
+        />
+        <div className="flex flex-col justify-center items-center text-gray-500 mt-4">
+          <div className="text-lg font-medium mb-2">Initial State</div>
+          <div className="text-sm">
+            Parameters: w₀ = 0.000, w₁ = 0.000
+          </div>
+          <div className="text-sm mt-4">Click <strong>Next</strong> to begin.</div>
         </div>
-        <div className="text-sm mt-4">Click <strong>Next</strong> to begin.</div>
       </div>
     );
   }
 
   return (
     <div className="bg-gray-50 rounded-lg p-5 h-full overflow-y-auto">
-      <div className="text-sm text-gray-500 mb-4 font-medium">
+      <ComputationGraph
+        graph={LINEAR_REGRESSION_GRAPH}
+        highlight={highlight}
+      />
+
+      <div className="text-sm text-gray-500 mb-4 mt-3 font-medium">
         Step {stepNumber} of {totalSteps}{" "}
         <span className="text-gray-400">({subStep + 1}/{subStepCount})</span>
         &nbsp;|&nbsp; Epoch{" "}
