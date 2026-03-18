@@ -7,10 +7,11 @@ Interactive browser-based visualizations for machine learning concepts. React 19
 ```bash
 npm run dev      # Start dev server
 npm run build    # Type-check (tsc) then bundle (vite)
+npm run test     # Run all tests (Vitest)
 npm run lint     # ESLint
 ```
 
-No test framework is configured. Verify changes by building (`npm run build`) and visually inspecting in the browser.
+**After every incremental feature change**, run `npm run test` to confirm all tests pass. **Always run `npm run test` before committing** — do not commit with failing tests.
 
 ## Project Structure
 
