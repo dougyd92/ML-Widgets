@@ -67,7 +67,6 @@ function computeLayout(
 }
 
 const ARROW_MARKER_ID = "arrow-forward";
-const ARROW_MARKER_BACK_ID = "arrow-backward";
 
 function SvgDefs({ accentColor }: { accentColor: string }) {
   return (
@@ -79,20 +78,9 @@ function SvgDefs({ accentColor }: { accentColor: string }) {
         refY="3"
         markerWidth="8"
         markerHeight="6"
-        orient="auto-start-reverse"
+        orient="auto"
       >
         <path d="M 0 0 L 10 3 L 0 6 Z" fill={accentColor} />
-      </marker>
-      <marker
-        id={ARROW_MARKER_BACK_ID}
-        viewBox="0 0 10 6"
-        refX="0"
-        refY="3"
-        markerWidth="8"
-        markerHeight="6"
-        orient="auto-start-reverse"
-      >
-        <path d="M 10 0 L 0 3 L 10 6 Z" fill={accentColor} />
       </marker>
     </defs>
   );
@@ -128,18 +116,20 @@ function GraphEdgeSvg({
   const fromOffset = fromShape === "rect" ? RECT_SIZE / 2 + 2 : NODE_RADIUS + 2;
   const toOffset = toShape === "rect" ? RECT_SIZE / 2 + 2 : NODE_RADIUS + 2;
 
-  const x1 = fromPos.x + ux * fromOffset;
-  const y1 = fromPos.y + uy * fromOffset;
-  const x2 = toPos.x - ux * toOffset;
-  const y2 = toPos.y - uy * toOffset;
+  const fwdX1 = fromPos.x + ux * fromOffset;
+  const fwdY1 = fromPos.y + uy * fromOffset;
+  const fwdX2 = toPos.x - ux * toOffset;
+  const fwdY2 = toPos.y - uy * toOffset;
 
   const isBackward = flowDirection === "backward" && isActive;
   const strokeColor = isActive ? accentColor : INACTIVE_COLOR;
   const strokeWidth = isActive ? 2 : 1.5;
-  const markerId = isBackward ? ARROW_MARKER_BACK_ID : ARROW_MARKER_ID;
-  const markerProp = isBackward
-    ? { markerStart: `url(#${markerId})` }
-    : { markerEnd: `url(#${markerId})` };
+
+  // Swap endpoints for backward flow so the arrow points right→left
+  const x1 = isBackward ? fwdX2 : fwdX1;
+  const y1 = isBackward ? fwdY2 : fwdY1;
+  const x2 = isBackward ? fwdX1 : fwdX2;
+  const y2 = isBackward ? fwdY1 : fwdY2;
 
   // Label position at midpoint, offset above the line
   const mx = (x1 + x2) / 2;
@@ -155,7 +145,7 @@ function GraphEdgeSvg({
         stroke={strokeColor}
         strokeWidth={strokeWidth}
         strokeDasharray={isBackward ? "6 3" : undefined}
-        {...markerProp}
+        markerEnd={`url(#${ARROW_MARKER_ID})`}
         style={{ transition: "stroke 300ms, stroke-width 300ms" }}
       />
       {label && isActive && (

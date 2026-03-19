@@ -25,12 +25,12 @@ function createFixture(): { stepResult: StepResult; samplePoints: DataPoint[] } 
 }
 
 describe('NEURAL_NETWORK_GRAPH definition', () => {
-  it('has 5 nodes', () => {
-    expect(NEURAL_NETWORK_GRAPH.nodes).toHaveLength(5)
+  it('has 6 nodes (2 inputs + bias + 2 hidden + 1 output)', () => {
+    expect(NEURAL_NETWORK_GRAPH.nodes).toHaveLength(6)
   })
 
-  it('has 6 edges', () => {
-    expect(NEURAL_NETWORK_GRAPH.edges).toHaveLength(6)
+  it('has 9 edges (4 input weights + 3 biases + 2 output weights)', () => {
+    expect(NEURAL_NETWORK_GRAPH.edges).toHaveLength(9)
   })
 
   it('all edge references point to valid node ids', () => {
@@ -62,23 +62,23 @@ describe('computeNNHighlightState', () => {
 
     it('subStep 1 (forward): all nodes active, forward flow', () => {
       const state = computeNNHighlightState(1, stepResult, samplePoints)
-      expect(state.activeNodes.size).toBe(5)
-      expect(state.activeEdges.size).toBe(6)
+      expect(state.activeNodes.size).toBe(6)
+      expect(state.activeEdges.size).toBe(9)
       expect(state.flowDirection).toBe('forward')
       expect(state.accentColor).toBe('#3b82f6')
     })
 
     it('subStep 2 (residual): red accent', () => {
       const state = computeNNHighlightState(2, stepResult, samplePoints)
-      expect(state.activeNodes.size).toBe(5)
+      expect(state.activeNodes.size).toBe(6)
       expect(state.accentColor).toBe('#ef4444')
       expect(state.flowDirection).toBe('forward')
     })
 
     it('subStep 3 (gradient): backward flow, purple accent', () => {
       const state = computeNNHighlightState(3, stepResult, samplePoints)
-      expect(state.activeNodes.size).toBe(5)
-      expect(state.activeEdges.size).toBe(6)
+      expect(state.activeNodes.size).toBe(6)
+      expect(state.activeEdges.size).toBe(9)
       expect(state.flowDirection).toBe('backward')
       expect(state.accentColor).toBe('#8b5cf6')
     })
