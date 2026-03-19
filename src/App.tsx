@@ -1,6 +1,7 @@
 import { Layout } from "./components/Layout";
 import { HomePage } from "./pages/HomePage";
 import { GradientDescentPage } from "./visualizations/gradient-descent/GradientDescentPage";
+import { NNGradientDescentPage } from "./visualizations/gradient-descent/NNGradientDescentPage";
 import { DecisionBoundaryPage } from "./visualizations/decision-boundary/DecisionBoundaryPage";
 import { RegularizationGeometryPage } from "./visualizations/regularization-geometry/RegularizationGeometryPage";
 
@@ -11,6 +12,14 @@ function App() {
     return (
       <Layout title="Regularization Geometry">
         <RegularizationGeometryPage />
+      </Layout>
+    );
+  }
+
+  if (path.startsWith("/viz/nn-gradient-descent")) {
+    return (
+      <Layout title="Neural Network Step-by-Step">
+        <NNGradientDescentPage />
       </Layout>
     );
   }

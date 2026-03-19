@@ -6,6 +6,12 @@ const visualizations = [
     color: "from-blue-500 to-indigo-600",
   },
   {
+    title: "Neural Network Step-by-Step",
+    description: "Watch a neural network learn XOR with backpropagation, one step at a time.",
+    path: "/viz/nn-gradient-descent",
+    color: "from-emerald-500 to-teal-600",
+  },
+  {
     title: "Decision Boundary Explorer",
     description: "Adjust model weights and see how the decision boundary shifts in 2D.",
     path: "/viz/decision_boundary",

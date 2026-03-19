@@ -11,8 +11,8 @@ interface Props {
   highlight: GraphHighlightState;
 }
 
-const SVG_WIDTH = 420;
-const SVG_HEIGHT = 250;
+const SVG_WIDTH = 480;
+const SVG_HEIGHT = 280;
 const PADDING_X = 60;
 const PADDING_Y = 50;
 const NODE_RADIUS = 24;
@@ -369,7 +369,7 @@ export function ComputationGraph({ graph, highlight }: Props) {
       <svg
         viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
         width="100%"
-        style={{ maxHeight: 250 }}
+        style={{ maxHeight: 300 }}
       >
         <SvgDefs accentColor={accentColor} />
 

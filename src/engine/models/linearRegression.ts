@@ -18,8 +18,26 @@ export const linearRegression: Model = {
     return { values: { w0: 0, w1: 0 } };
   },
 
-  predict(params: Parameters, x: number): number {
-    return params.values.w0 + params.values.w1 * x;
+  predict(params: Parameters, point: DataPoint): number {
+    return params.values.w0 + params.values.w1 * point.x;
+  },
+
+  computeLoss(predictions: number[], targets: number[]): number {
+    let sum = 0;
+    for (let i = 0; i < predictions.length; i++) {
+      const r = predictions[i] - targets[i];
+      sum += r * r;
+    }
+    return sum / predictions.length;
+  },
+
+  describeParams(params: Parameters): ComputationStep {
+    const { w0, w1 } = params.values;
+    return {
+      label: "Current parameters",
+      expression: `w₀ = ${fmt(w0)}    w₁ = ${fmt(w1)}`,
+      phase: "params",
+    };
   },
 
   computeGradients(params: Parameters, points: DataPoint[]): GradientResult {
@@ -30,7 +48,7 @@ export const linearRegression: Model = {
     let totalLoss = 0;
 
     for (const point of points) {
-      const pred = this.predict(params, point.x);
+      const pred = this.predict(params, point);
       const res = pred - point.y;
       predictions.push(pred);
       residuals.push(res);
@@ -65,7 +83,7 @@ export const linearRegression: Model = {
 
     if (points.length === 1) {
       const point = points[0];
-      const yHat = this.predict(params, point.x);
+      const yHat = this.predict(params, point);
       return [
         {
           label: "Forward pass (prediction)",
@@ -83,7 +101,7 @@ export const linearRegression: Model = {
 
     // Batch mode
     const n = points.length;
-    const preds = points.map((p) => this.predict(params, p.x));
+    const preds = points.map((p) => this.predict(params, p));
     const residuals = points.map((p, i) => preds[i] - p.y);
     const meanPred = preds.reduce((a, b) => a + b, 0) / n;
     const meanRes = residuals.reduce((a, b) => a + b, 0) / n;
@@ -114,7 +132,7 @@ export const linearRegression: Model = {
   ): ComputationStep[] {
     if (points.length === 1) {
       const point = points[0];
-      const yHat = this.predict(params, point.x);
+      const yHat = this.predict(params, point);
       const residual = yHat - point.y;
       return [
         {
@@ -135,7 +153,7 @@ export const linearRegression: Model = {
     let dw0 = 0;
     let dw1 = 0;
     for (const point of points) {
-      const res = this.predict(params, point.x) - point.y;
+      const res = this.predict(params, point) - point.y;
       dw0 += 2 * res;
       dw1 += 2 * res * point.x;
     }

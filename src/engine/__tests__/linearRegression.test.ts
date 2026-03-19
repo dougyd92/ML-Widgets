@@ -8,17 +8,17 @@ describe('linearRegression model', () => {
   describe('predict', () => {
     it('computes w0 + w1 * x', () => {
       const params: Parameters = { values: { w0: 1, w1: 2 } }
-      expect(model.predict(params, 3)).toBe(7) // 1 + 2*3
+      expect(model.predict(params, { x: 3, y: 0 })).toBe(7) // 1 + 2*3
     })
 
     it('returns 0 with zero params', () => {
       const params: Parameters = { values: { w0: 0, w1: 0 } }
-      expect(model.predict(params, 5)).toBe(0)
+      expect(model.predict(params, { x: 5, y: 0 })).toBe(0)
     })
 
     it('handles negative params', () => {
       const params: Parameters = { values: { w0: -1, w1: -0.5 } }
-      expect(model.predict(params, 4)).toBe(-3) // -1 + (-0.5)*4
+      expect(model.predict(params, { x: 4, y: 0 })).toBe(-3) // -1 + (-0.5)*4
     })
   })
 

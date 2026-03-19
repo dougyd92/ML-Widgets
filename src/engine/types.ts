@@ -1,6 +1,7 @@
 export interface DataPoint {
   x: number;
   y: number;
+  features?: number[];
 }
 
 export interface Parameters {
@@ -29,8 +30,10 @@ export interface Model {
   name: string;
   parameterNames: string[];
   initialParameters(): Parameters;
-  predict(params: Parameters, x: number): number;
+  predict(params: Parameters, point: DataPoint): number;
   computeGradients(params: Parameters, points: DataPoint[]): GradientResult;
+  computeLoss(predictions: number[], targets: number[]): number;
+  describeParams(params: Parameters): ComputationStep;
   describeForwardPass(params: Parameters, points: DataPoint[]): ComputationStep[];
   describeGradients(params: Parameters, points: DataPoint[]): ComputationStep[];
 }

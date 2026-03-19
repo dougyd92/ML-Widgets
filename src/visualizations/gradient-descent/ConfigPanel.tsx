@@ -4,7 +4,7 @@ function formatMultiplier(m: number): string {
   return `${m}x`;
 }
 
-const BATCH_OPTIONS = [
+const DEFAULT_BATCH_OPTIONS = [
   { value: 1, label: "SGD (1)" },
   { value: 4, label: "Mini-batch (4)" },
   { value: 10, label: "Full Batch (10)" },
@@ -14,6 +14,7 @@ interface Props {
   learningRate: number;
   speedMultiplier: number;
   batchSize: number;
+  batchOptions?: { value: number; label: string }[];
   onLearningRateChange: (lr: number) => void;
   onSpeedChange: (multiplier: number) => void;
   onBatchSizeChange: (size: number) => void;
@@ -23,6 +24,7 @@ export function ConfigPanel({
   learningRate,
   speedMultiplier,
   batchSize,
+  batchOptions = DEFAULT_BATCH_OPTIONS,
   onLearningRateChange,
   onSpeedChange,
   onBatchSizeChange,
@@ -70,7 +72,7 @@ export function ConfigPanel({
           Batch size:
         </span>
         <div className="flex rounded-md overflow-hidden border border-gray-300">
-          {BATCH_OPTIONS.map((opt) => (
+          {batchOptions.map((opt, i) => (
             <button
               key={opt.value}
               onClick={() => onBatchSizeChange(opt.value)}
@@ -78,7 +80,7 @@ export function ConfigPanel({
                 batchSize === opt.value
                   ? "bg-blue-500 text-white"
                   : "bg-white text-gray-600 hover:bg-gray-100"
-              } ${opt.value !== BATCH_OPTIONS[0].value ? "border-l border-gray-300" : ""}`}
+              } ${i > 0 ? "border-l border-gray-300" : ""}`}
             >
               {opt.label}
             </button>

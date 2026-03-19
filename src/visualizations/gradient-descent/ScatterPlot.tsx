@@ -8,14 +8,10 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
-import type { DataPoint, Parameters } from "@/engine/types";
+import type { DataPoint } from "@/engine/types";
+import type { VisualizationPanelProps } from "./modelKit";
 
-interface Props {
-  data: DataPoint[];
-  activeIndices: number[];
-  params: Parameters;
-  showResidualLine: boolean;
-}
+type Props = VisualizationPanelProps;
 
 // Custom dot renderer for highlighting active points
 function renderDot(
@@ -63,6 +59,7 @@ function computeFixedDomain(data: DataPoint[]) {
 }
 
 export function ScatterPlot({ data, activeIndices, params, showResidualLine }: Props) {
+  // Note: `model` prop available but not used — LR scatter plot uses params directly
   const w0 = params.values.w0;
   const w1 = params.values.w1;
 

@@ -1,5 +1,6 @@
 import { renderHook, act } from '@testing-library/react'
 import { useGradientDescent } from '../hooks/useGradientDescent'
+import { linearRegressionKit } from '../linearRegressionKit'
 import type { GDConfig } from '@/engine/types'
 
 const defaultConfig: GDConfig = {
@@ -10,7 +11,7 @@ const defaultConfig: GDConfig = {
 }
 
 function renderGD(config: GDConfig = defaultConfig) {
-  return renderHook(({ config }) => useGradientDescent(config), {
+  return renderHook(({ config }) => useGradientDescent(config, linearRegressionKit), {
     initialProps: { config },
   })
 }

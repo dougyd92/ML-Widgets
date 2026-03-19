@@ -1,17 +1,14 @@
 import { useState, useRef, useMemo, useCallback } from "react";
 import { GDEngine } from "@/engine/engine";
-import { linearRegression } from "@/engine/models/linearRegression";
 import { createVanillaSgd } from "@/engine/updateRules/vanillaSgd";
 import { createMiniBatch } from "@/engine/batchStrategies/miniBatch";
-import { generateData } from "@/engine/data";
 import type { StepResult, DataPoint, Parameters, GDConfig, ComputationStep, ComputationPhase } from "@/engine/types";
+import type { ModelKit } from "../modelKit";
 
-const DEFAULT_DATA = generateData(10, 42);
-const TOTAL_EPOCHS = 12;
 const SUB_STEP_COUNT = 5;
 const PHASE_ORDER: ComputationPhase[] = ['params', 'forward', 'residual', 'gradient', 'update'];
 
-export function useGradientDescent(config: GDConfig) {
+export function useGradientDescent(config: GDConfig, kit: ModelKit) {
   const engineRef = useRef<GDEngine | null>(null);
   const [history, setHistory] = useState<StepResult[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
@@ -20,10 +17,10 @@ export function useGradientDescent(config: GDConfig) {
   // Initialize engine lazily
   if (engineRef.current === null) {
     engineRef.current = new GDEngine(
-      linearRegression,
+      kit.model,
       createVanillaSgd(),
       createMiniBatch(config.batchSize),
-      DEFAULT_DATA,
+      kit.defaultData,
       config.learningRate
     );
   }
@@ -31,7 +28,7 @@ export function useGradientDescent(config: GDConfig) {
   const engine = engineRef.current;
   const data: DataPoint[] = engine.getData();
   const stepsPerEpoch = Math.ceil(data.length / config.batchSize);
-  const maxSteps = TOTAL_EPOCHS * stepsPerEpoch;
+  const maxSteps = kit.totalEpochs * stepsPerEpoch;
 
   const currentStep: StepResult | null = useMemo(
     () => (currentStepIndex >= 0 ? history[currentStepIndex] : null),
@@ -39,14 +36,14 @@ export function useGradientDescent(config: GDConfig) {
   );
 
   const currentParams: Parameters = useMemo(() => {
-    if (!currentStep) return linearRegression.initialParameters();
+    if (!currentStep) return kit.model.initialParameters();
     return subStep >= SUB_STEP_COUNT - 1 ? currentStep.paramsAfter : currentStep.paramsBefore;
-  }, [currentStep, subStep]);
+  }, [currentStep, subStep, kit.model]);
 
   const currentLoss: number = useMemo(() => {
-    if (!currentStep) return engine.computeFullLoss(linearRegression.initialParameters());
+    if (!currentStep) return engine.computeFullLoss(kit.model.initialParameters());
     return subStep >= SUB_STEP_COUNT - 1 ? currentStep.lossAfter : currentStep.lossBefore;
-  }, [currentStep, subStep, engine]);
+  }, [currentStep, subStep, engine, kit.model]);
 
   const visibleComputationSteps: ComputationStep[] = useMemo(() => {
     if (!currentStep) return [];
@@ -150,7 +147,7 @@ export function useGradientDescent(config: GDConfig) {
     lossHistory,
     currentEpoch,
     sampleIndexInEpoch,
-    totalEpochs: TOTAL_EPOCHS,
+    totalEpochs: kit.totalEpochs,
     samplesPerEpoch: stepsPerEpoch,
     stepNumber: currentStepIndex + 1,
     totalSteps: maxSteps,

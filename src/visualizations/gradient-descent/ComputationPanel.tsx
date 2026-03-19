@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import type { StepResult, ComputationStep, DataPoint } from "@/engine/types";
+import type { ComputationGraphDef, GraphHighlightState } from "./graphTypes";
 import { MathLine } from "./MathLine";
 import { ComputationGraph } from "./ComputationGraph";
-import { LINEAR_REGRESSION_GRAPH, computeHighlightState } from "./linearRegressionGraph";
 
 interface Props {
   stepResult: StepResult | null;
@@ -15,6 +15,13 @@ interface Props {
   subStep: number;
   subStepCount: number;
   data: DataPoint[];
+  graphDef: ComputationGraphDef;
+  computeHighlight: (
+    subStep: number,
+    stepResult: StepResult | null,
+    samplePoints: DataPoint[]
+  ) => GraphHighlightState;
+  initialStateLabel: string;
 }
 
 export function ComputationPanel({
@@ -28,6 +35,9 @@ export function ComputationPanel({
   subStep,
   subStepCount,
   data,
+  graphDef,
+  computeHighlight,
+  initialStateLabel,
 }: Props) {
   const samplePoints = useMemo(() => {
     if (!stepResult) return [];
@@ -35,21 +45,21 @@ export function ComputationPanel({
   }, [stepResult, data]);
 
   const highlight = useMemo(
-    () => computeHighlightState(subStep, stepResult, samplePoints),
-    [subStep, stepResult, samplePoints]
+    () => computeHighlight(subStep, stepResult, samplePoints),
+    [subStep, stepResult, samplePoints, computeHighlight]
   );
 
   if (!stepResult) {
     return (
       <div className="bg-gray-50 rounded-lg p-5 h-full flex flex-col">
         <ComputationGraph
-          graph={LINEAR_REGRESSION_GRAPH}
+          graph={graphDef}
           highlight={highlight}
         />
         <div className="flex flex-col justify-center items-center text-gray-500 mt-4">
           <div className="text-lg font-medium mb-2">Initial State</div>
           <div className="text-sm">
-            Parameters: w₀ = 0.000, w₁ = 0.000
+            {initialStateLabel}
           </div>
           <div className="text-sm mt-4">Click <strong>Next</strong> to begin.</div>
         </div>
@@ -60,7 +70,7 @@ export function ComputationPanel({
   return (
     <div className="bg-gray-50 rounded-lg p-5 h-full overflow-y-auto">
       <ComputationGraph
-        graph={LINEAR_REGRESSION_GRAPH}
+        graph={graphDef}
         highlight={highlight}
       />
 

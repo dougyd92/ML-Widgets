@@ -48,20 +48,8 @@ export class GDEngine {
     // Build computation steps for the UI
     const computationSteps: ComputationStep[] = [];
 
-    // Current parameters
-    const paramNames = this.model.parameterNames;
-    const subscripts = ["₀", "₁", "₂", "₃", "₄", "₅", "₆", "₇", "₈", "₉"];
-    const paramStr = paramNames
-      .map(
-        (name, i) =>
-          `w${subscripts[i] ?? `_${i}`} = ${this.params.values[name].toFixed(3)}`
-      )
-      .join("    ");
-    computationSteps.push({
-      label: "Current parameters",
-      expression: paramStr,
-      phase: "params",
-    });
+    // Current parameters (model-specific formatting)
+    computationSteps.push(this.model.describeParams(this.params));
 
     // Forward pass and error
     computationSteps.push(
@@ -114,13 +102,13 @@ export class GDEngine {
   }
 
   computeFullLoss(params: Parameters): number {
-    let totalLoss = 0;
+    const predictions: number[] = [];
+    const targets: number[] = [];
     for (const point of this.data) {
-      const prediction = this.model.predict(params, point.x);
-      const residual = prediction - point.y;
-      totalLoss += residual * residual;
+      predictions.push(this.model.predict(params, point));
+      targets.push(point.y);
     }
-    return totalLoss / this.data.length;
+    return this.model.computeLoss(predictions, targets);
   }
 
   getCurrentParams(): Parameters {
